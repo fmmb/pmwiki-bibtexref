@@ -1,5 +1,4 @@
 <?php
-
 /* Copyright (C) 2004 Alexandre Courbot. <alexandrecourbot@linuxgames.com>
 
 This program is free software; you can redistribute it and/or modify
@@ -27,14 +26,26 @@ $BibtexGenerateDefaultUrlField = false;
 
 $BibtexLang = array();
 
-Markup("bibtexcite","inline","/\\{\\[(.*?),(.*?)\\]\\}/e","BibCite('$1', '$2')");
 
+/*
+Markup("bibtexcite","inline","/\\{\\[(.*?),(.*?)\\]\\}/e","BibCite('$1', '$2')");
 Markup("bibtexquery","fulltext","/\\bbibtexquery:\\[(.*?)\\]\\[(.*?)\\]\\[(.*?)\\]\\[(.*?)\\]/e","BibQuery('$1', '$2', '$3', '$4')");
 Markup("bibtexsummary","fulltext","/\\bbibtexsummary:\\[(.*?),(.*?)\\]/e","BibSummary('$1', '$2')");
 Markup("bibtexcomplete","fulltext","/\\bbibtexcomplete:\\[(.*?),(.*?)\\]/e","CompleteBibEntry('$1', '$2')");
-Markup("bibtexsummaryauthorbold","fulltext","/\\bbibtexsummaryauthorbold:\\[(.*?),(.*?),(.*?)\\]/e","BibSummaryAuthorFirst('$1', '$2', '$3')");                          
+Markup("bibtexsummaryauthorbold","fulltext","/\\bbibtexsummaryauthorbold:\\[(.*?),(.*?),(.*?)\\]/e","BibSummaryAuthorFirst('$1', '$2', '$3')");
+*/
 
+Markup("bibtexcite","inline","/\\{\\[(.*?),(.*?)\\]\\}/","BibCite_callback");
+Markup("bibtexquery","fulltext","/\\bbibtexquery:\\[(.*?)\\]\\[(.*?)\\]\\[(.*?)\\]\\[(.*?)\\]/","BibQuery_callback");
+Markup("bibtexsummary","fulltext","/\\bbibtexsummary:\\[(.*?),(.*?)\\]/","BibSummary_callback");
+Markup("bibtexcomplete","fulltext","/\\bbibtexcomplete:\\[(.*?),(.*?)\\]/","CompleteBibEntry_callback");
+Markup("bibtexsummaryauthorbold","fulltext","/\\bbibtexsummaryauthorbold:\\[(.*?),(.*?),(.*?)\\]/","BibSummaryAuthorFirst_callback");
 
+function BibCite_callback($v){ return BibCite($v[1], $v[2]); }
+function BibQuery_callback($v){ return BibQuery($v[1], $v[2], $v[3], $v[4]); }
+function BibSummary_callback($v){ return BibSummary($v[1], $v[2]); }
+function CompleteBibEntry_callback($v){ return CompleteBibEntry($v[1], $v[2]); }
+function BibSummaryAuthorFirst_callback($v){ return BibSummaryAuthorFirst($v[1], $v[2], $v[3]); }
 
 SDV($HandleActions['bibentry'],'HandleBibEntry');
 
@@ -103,33 +114,27 @@ class BibtexEntry {
       return $ret;
     }
     
-    function getName()
-    {
+    function getName() {
       return $this->entryname;
     }
 
-    function getTitle()
-    {
+    function getTitle() {
       return $this->getFormat('TITLE');
     }
 
-    function getAbstract()
-    {
+    function getAbstract() {
       return $this->get('ABSTRACT');
     }
 
-    function getComment()
-    {
+    function getComment() {
       return $this->get('COMMENT');
     }
 
-    function getPages()
-    {
+    function getPages() {
       $pages = $this->get('PAGES');
-      if ($pages)
-      {
+      if ($pages) {
           $found = strpos($pages, "--");
-          if (found)
+          if ($found)
                 return str_replace("--", "-", $pages);
           else
                 return $pages;
@@ -137,8 +142,7 @@ class BibtexEntry {
       return "";
     }
 
-    function getPagesWithLabel()
-    {
+    function getPagesWithLabel() {
         $pages = $this->getPages();
         if ($pages)
         {
@@ -150,8 +154,7 @@ class BibtexEntry {
         return $pages;
     }
     
-    function get($field)
-    {
+    function get($field) {
       $val = $this->values[$field];
       if ($val == FALSE) {
           $val = $this->values[strtolower($field)];
@@ -160,8 +163,7 @@ class BibtexEntry {
     }
 
 
-    function getFormat($field)
-    {
+    function getFormat($field) {
       $ret = $this->get($field);
       if ($ret)
       {
@@ -408,8 +410,8 @@ class BibtexEntry {
 
       $ret = $ret . "@@@" . $this->entrytype . " { " . $this->entryname . ",\\\\\n";
 
-      while (list($key, $value)=each($this->values))
-      {
+      #while (list($key, $value)=each($this->values)) {
+      foreach ($this->values as $key => $value) {
         if ($BibtexSilentFields && in_array($key, $BibtexSilentFields)) continue;
         $ret = $ret . "&nbsp;&nbsp;&nbsp;&nbsp;" . $key . " = { " . $value . " },\\\\\n";
       }
@@ -548,32 +550,30 @@ class Article extends BibtexEntry {
   function getSummary($dourl = true)
   {
     $ret = parent::getPreString($dourl);
-    $journal = parent::get("JOURNALTITLE");
-    if ($journal)
-    {
+   // fmmb: moved JOURNALTITLE to JOURNAL
+    $journal = parent::get("JOURNAL");
+    if ($journal) {
       $ret = $ret . " " . $journal;
       $volume = parent::get("VOLUME");
-      if ($volume)
-      {
+      if ($volume) {
         $ret = $ret . ", " . $volume;
         $number = parent::get("NUMBER");
-        if ($number)
-        {
+        if ($number) {
           $ret = $ret . "(" . $number . ")";
         }
         $pages = parent::getPages();
-        if ($pages)
-        {
+        if ($pages) {
           $ret = $ret . ":" . $pages;
         }
         $publisher = parent::get("PUBLISHER");
-        if ($publisher)
-        {
-          $ret = $ret . ". " . $publisher;
+        if ($publisher) {
+          // fmmb: $ret = $ret . ". " . $publisher;
+          $ret = $ret . "" . $publisher;
         }
       }
     }
-    return $ret . ". " . parent::getPostString($dourl);
+    // fmmb: return $ret . ". " . parent::getPostString($dourl);
+    return $ret . "" . parent::getPostString($dourl);
   }
 }
 
@@ -913,8 +913,8 @@ function BibQuery($files, $cond, $sort, $max)
 
     $res = array();
     $bibselectedentries = $BibEntries[$files];
-    while (list($key, $value)=each($bibselectedentries))
-    {
+    #while (list($key, $value)=each($bibselectedentries)) {
+    foreach ($bibselectedentries as $key => $value) {
        
         if ($value->evalCond($cond))
             $res[] = $value;
@@ -932,8 +932,8 @@ function BibQuery($files, $cond, $sort, $max)
     if ($max != '')
         $res = array_slice($res, 0, (int) $max);
 
-    while (list($key, $value)=each($res))
-    {
+    #while (list($key, $value)=each($res)) {
+    foreach ($res as $key => $value) {
         $ret .= "#" . $value->getSummary() . "\n";
     }
 
@@ -982,10 +982,9 @@ function GetEntry($bib, $ref)
     
     reset($bibtable);
 
-    while (list($key, $value)=each($bibtable))
-    {
-        if ($value->getName() == $ref)
-        {
+    #while (list($key, $value)=each($bibtable)) {
+    foreach ($bibtable as $key => $value) {
+        if ($value->getName() == $ref) {
             $bibref = $value;
             break;
         }
@@ -1050,6 +1049,10 @@ function ParseEntries($fname, $entries)
       else if ($entrytype == "PROCEEDINGS") $entry = new Proceedings($fname, $entryname);
       else $entry = new Misc($fname, $entryname);
 
+      # fmmb: Added this, optherwise it wont work
+      $entry->bibfile = $fname;
+      $entry->entryname = $entryname;
+
       // match all keys
       preg_match_all("/(\w+)\s*=\s*([^¶]+)¶?/", $entries[3][$i], $all_keys);
 
@@ -1074,6 +1077,7 @@ function ParseEntries($fname, $entries)
 
    $BibEntries[$fname] = $bibfileentry;
 }
+
 
 
 function ParseBib($bib_file, $bib_file_string)
@@ -1104,16 +1108,13 @@ function ParseBib($bib_file, $bib_file_string)
    }
 
    $bib_file_string = preg_replace("/¶¶/", "¶", $bib_file_string);
-   
-   $nb_bibentry = preg_match_all("/@(\w+)\s*¤\s*([^¶]*)¶([^¤]*)¤/", $bib_file_string, $matches);
 
+   $nb_bibentry = preg_match_all("/@(\w+)\s*¤\s*([^¶]*)¶([^¤]*)¤/", $bib_file_string, $matches);
    ParseEntries($bib_file, $matches);
 }
-
 function ParseBibFile($bib_file)
 {
     global $BibtexBibDir, $pagename;
-
 
     $wikibib_file = MakePageName($pagename, $bib_file);
 
@@ -1137,15 +1138,12 @@ function ParseBibFile($bib_file)
             $f = fopen($BibtexBibDir . $bib_file, "r");
             $bib_file_string = "";
 
-            if ($f)
-            {
-                while (!feof($f))
-                {
+            if ($f) {
+                while (!feof($f)) {
                     $bib_file_string = $bib_file_string . fgets($f, 1024);
                 }
 
                 $bib_file_string = preg_replace("/\n/", "", $bib_file_string);
-
                 ParseBib($bib_file, $bib_file_string);
 
                 return true;
