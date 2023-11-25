@@ -5,12 +5,18 @@ This little script allows you to display your bibtex bibliography into PmWiki
 in a convenient way and to put references to it. It introduces new markups and
 works directly over .bib files.
 
-You can see an example usage of a previous version of this script at
-http://www.lifl.fr/2XS/Team/Publications. It demonstrates the query feature.
+Notice (by Fernando Batista)
+================
 
-Another example is http://www.irit.fr/~Victor.Noel/Main/Publications.
-It uses the last version of this script.
+I realised that nobody was maintaning this package for a long time, and
+the usage examples in the original repository were not working.
+In 2023 my sysadmin updated the web server and the script stop completely. 
+Weel, I went deep in the code and corrected a number of thinks, more in a 
+tweek fashion, until it started working again.
+Here is an usage example that uses this version of the script
+https://www.hlt.inesc-id.pt/~fmmb/wiki/index.php?n=Main.Publications
 
+Please feel free to use it
 
 Installation
 ============
