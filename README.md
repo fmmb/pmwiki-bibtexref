@@ -8,15 +8,7 @@ works directly over .bib files.
 Notice (by Fernando Batista)
 ================
 
-I realised that nobody was maintaning this package for a long time, and
-the usage examples in the original repository were not working.
-In 2023 my sysadmin updated the web server and the script stop completely. 
-Weel, I went deep in the code and corrected a number of thinks, more in a 
-tweek fashion, until it started working again.
-Here is an usage example that uses this version of the script
-https://www.hlt.inesc-id.pt/~fmmb/wiki/index.php?n=Main.Publications
-
-Please feel free to use it
+A few days ago I did an update on my web server and the script stop working completely. As this package is not being maintained for a long time, I went into the code and corrected a number of things until it started to work again. As soon as I have a bit more time, I plan to perform a more extensive revision of the code, but for now please feel free to use this fork of pmwiki-bibtexref. Here is [my publications page](https://www.hlt.inesc-id.pt/~fmmb/wiki/index.php?n=Main.Publications), which uses this version of the script
 
 Installation
 ============
